@@ -27,6 +27,7 @@
 #include <unistd.h>
 #include <confuse.h>
 #include <sys/stat.h>		/* mkdir() */
+#include <paths.h>
 
 
 #include "log.h"
@@ -227,7 +228,11 @@ static int compose_paths(int dryrun)
 
 			home = getenv("HOME");
 			if (!home) {
-				logit(LOG_ERR, "Cannot create fallback cache dir: %s", strerror(errno));
+				if (!dryrun) {
+					logit(LOG_ERR, "%s is not writeable but $HOME is not set: falling back to /tmp",
+					      cache_dir);
+				}
+				snprintf(cache_dir, len, _PATH_TMP);
 				return 0;
 			}
 
